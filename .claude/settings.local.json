@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet add *)",
+      "Bash(dotnet build *)",
+      "Bash(dotnet user-secrets *)",
+      "Bash(rm -f C:/Users/lazar/source/repos/TypeRacer/TypeRacer/typeracer.db C:/Users/lazar/source/repos/TypeRacer/TypeRacer/typeracer.db-shm C:/Users/lazar/source/repos/TypeRacer/TypeRacer/typeracer.db-wal)",
+      "Bash(dotnet ef *)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(git --version)",
+      "Bash(gh --version)"
+    ]
+  }
+}
