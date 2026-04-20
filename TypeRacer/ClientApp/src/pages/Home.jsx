@@ -1,53 +1,98 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
 
-const DEMO_SENTENCES = [
-  "Programiranje zahteva strpljenje, logičko razmišljanje i kreativnost.",
-  "Beograd leži na ušću Save u Dunav i predstavlja srce srpske kulture.",
-  "Muzika ima moć da promeni raspoloženje i poveže ljude iz raznih kultura.",
-]
+const CHARS = 'asdfghjklqwertyuiopzxcvbnm{}[]()<>|/\\;:'.split('')
+
+function useFloatingChars(canvasRef) {
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    let W, H, particles, raf
+
+    function resize() {
+      W = canvas.width  = canvas.offsetWidth
+      H = canvas.height = canvas.offsetHeight
+    }
+
+    function make() {
+      return {
+        x:    Math.random() * W,
+        y:    Math.random() * H,
+        ch:   CHARS[Math.floor(Math.random() * CHARS.length)],
+        size: 10 + Math.random() * 10,
+        vx:   (Math.random() - 0.5) * 0.35,
+        vy:   -0.2 - Math.random() * 0.4,
+        alpha: 0.04 + Math.random() * 0.13,
+        life:  0,
+        maxLife: 180 + Math.random() * 220,
+      }
+    }
+
+    function init() {
+      resize()
+      particles = Array.from({ length: 55 }, make)
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H)
+      ctx.font = `500 {size}px 'JetBrains Mono', monospace`
+
+      for (const p of particles) {
+        p.life++
+        p.x += p.vx
+        p.y += p.vy
+
+        const progress = p.life / p.maxLife
+        const fade = progress < 0.1
+          ? progress / 0.1
+          : progress > 0.8
+          ? 1 - (progress - 0.8) / 0.2
+          : 1
+
+        ctx.globalAlpha = p.alpha * fade
+        ctx.fillStyle = Math.random() > 0.97 ? '#f0b429' : '#7c5af6'
+        ctx.font = `500 ${p.size}px 'JetBrains Mono', monospace`
+        ctx.fillText(p.ch, p.x, p.y)
+
+        if (p.life >= p.maxLife || p.y < -20 || p.x < -20 || p.x > W + 20) {
+          Object.assign(p, make(), { y: H + 10 })
+        }
+      }
+
+      ctx.globalAlpha = 1
+      raf = requestAnimationFrame(draw)
+    }
+
+    init()
+    draw()
+
+    const ro = new ResizeObserver(() => { resize() })
+    ro.observe(canvas)
+
+    return () => { cancelAnimationFrame(raf); ro.disconnect() }
+  }, [])
+}
 
 export default function Home() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-
-  const [demoIdx, setDemoIdx]     = useState(0)
-  const [demoTyped, setDemoTyped] = useState(0)
-  const [demoPhase, setDemoPhase] = useState('typing')
-
-  const sentence = DEMO_SENTENCES[demoIdx]
-
-  useEffect(() => {
-    let t
-    if (demoPhase === 'typing') {
-      if (demoTyped < sentence.length) {
-        t = setTimeout(() => setDemoTyped(n => n + 1), 72)
-      } else {
-        t = setTimeout(() => setDemoPhase('pause'), 2400)
-      }
-    } else if (demoPhase === 'pause') {
-      t = setTimeout(() => setDemoPhase('deleting'), 400)
-    } else {
-      if (demoTyped > 0) {
-        t = setTimeout(() => setDemoTyped(n => n - 1), 16)
-      } else {
-        setDemoIdx(i => (i + 1) % DEMO_SENTENCES.length)
-        setDemoPhase('typing')
-      }
-    }
-    return () => clearTimeout(t)
-  }, [demoPhase, demoTyped, sentence.length])
-
-  const demoPct = Math.round((demoTyped / sentence.length) * 100)
-  const demoWpm = demoPhase === 'typing' && demoTyped > 10
-    ? Math.round((demoTyped / 5) / ((demoTyped * 72) / 60000))
-    : 0
+  const canvasRef = useRef(null)
+  useFloatingChars(canvasRef)
 
   return (
-    <div className="home-page">
-      {/* ── Navbar ── */}
-      <nav className="home-nav">
+    <div className="home-page" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
+
+      {/* Canvas pozadina */}
+      <canvas
+        ref={canvasRef}
+        style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
+      />
+
+      {/* Navbar */}
+      <nav className="home-nav" style={{ position: 'relative', zIndex: 10 }}>
         <div className="home-nav-inner">
           <div className="home-nav-logo">
             <div className="logo-icon" style={{ width: 36, height: 36, fontSize: '1.1rem', borderRadius: 10 }}>⌨</div>
@@ -78,98 +123,59 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="home-content">
-        {/* ── Hero ── */}
-        <section className="hero">
-          <div className="hero-orb hero-orb-1" />
-          <div className="hero-orb hero-orb-2" />
+      {/* Sadržaj */}
+      <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 64px)', gap: '3rem', padding: '2rem' }}>
 
-          <div className="hero-badge">🇷🇸 Srpski jezik · Besplatno</div>
-
-          <h1 className="hero-title">
+        {/* Hero */}
+        <div style={{ textAlign: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both' }}>
+          <div style={{ display: 'inline-block', background: 'var(--primary-dim)', border: '1px solid rgba(124,90,246,.3)', borderRadius: 999, padding: '0.3rem 1rem', fontSize: '0.8rem', color: '#a78bfa', fontWeight: 600, marginBottom: '1.5rem', letterSpacing: '0.05em' }}>
+            🇷🇸 Srpski jezik
+          </div>
+          <h1 className="hero-title" style={{ marginBottom: '1rem' }}>
             Kucaj brže.
             <br />
             <span className="hero-title-accent">Pobedi sve.</span>
           </h1>
-
-          <p className="hero-subtitle">
-            Testiraj brzinu kucanja na srpskom jeziku —
-            sam ili protiv prijatelja u realnom vremenu.
+          <p style={{ color: 'var(--text-2)', fontSize: '1.05rem', maxWidth: 400, margin: '0 auto' }}>
+            Testiraj brzinu kucanja — sam ili protiv prijatelja u realnom vremenu.
           </p>
+        </div>
 
-          <div className="hero-ctas">
-            <Link to="/solo" className="btn btn-primary btn-lg hero-cta-primary">
-              ▶&nbsp; Počni odmah
-            </Link>
-            <Link to="/multi" className="btn btn-ghost btn-lg">
-              👥&nbsp; Višeigračko
-            </Link>
-          </div>
+        {/* CTA dugmad */}
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.1s' }}>
+          <Link to="/solo" className="btn btn-primary btn-lg">▶ Počni odmah</Link>
+          <Link to="/multi" className="btn btn-ghost btn-lg">👥 Višeigračko</Link>
+        </div>
 
-          {/* Typing demo */}
-          <div className="hero-demo">
-            <div className="hero-demo-topbar">
-              <span className="hero-demo-label">DEMO</span>
-              {demoWpm > 0 && (
-                <span className="hero-demo-wpm">{demoWpm} <span style={{ fontSize: '0.7rem', opacity: .6 }}>r/min</span></span>
-              )}
-              <span className="hero-demo-pct">{demoPct}%</span>
-            </div>
-            <div className="hero-demo-sentence">
-              {sentence.split('').map((ch, i) => {
-                let cls = 'ch ch-pending'
-                if (i < demoTyped) cls = 'ch ch-correct'
-                if (i === demoTyped && demoPhase === 'typing') cls = 'ch ch-cursor ch-pending'
-                return <span key={i} className={cls}>{ch}</span>
-              })}
-            </div>
-            <div className="hero-demo-track">
-              <div className="hero-demo-fill" style={{ width: `${demoPct}%` }} />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Mode cards ── */}
-        <section className="home-modes-section">
-          <div className="home-modes">
-            <Link to="/solo" className="mode-card solo" style={{ animation: 'card-in .5s cubic-bezier(.22,1,.36,1) both', animationDelay: '.05s' }}>
-              <div className="mode-icon">🏃</div>
-              <div className="mode-title">Jedan igrač</div>
-              <div className="mode-desc">Vežbaj sam, biraj težinu rečenica i prati napredak u brzini kucanja.</div>
-              <div className="mode-arrow">Pokreni →</div>
-            </Link>
-
-            <Link to="/multi" className="mode-card multi" style={{ animation: 'card-in .5s cubic-bezier(.22,1,.36,1) both', animationDelay: '.13s' }}>
-              <div className="mode-icon">🏁</div>
-              <div className="mode-title">Više igrača</div>
-              <div className="mode-desc">Napravi sobu, pozovi prijatelje i takmiči se u kucanju u realnom vremenu.</div>
-              <div className="mode-arrow">Igraj →</div>
-            </Link>
-
-            <Link to="/leaderboard" className="mode-card leaderboard-card" style={{ animation: 'card-in .5s cubic-bezier(.22,1,.36,1) both', animationDelay: '.21s' }}>
-              <div className="mode-icon">🏆</div>
-              <div className="mode-title">Leaderboard</div>
-              <div className="mode-desc">Pogledaj najbrže igrače i uporedi svoje rezultate sa ostatkom zajednice.</div>
-              <div className="mode-arrow">Pogledaj →</div>
-            </Link>
-          </div>
-        </section>
-
-        {/* ── Features strip ── */}
-        <div className="home-features">
+        {/* Mode kartice */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', maxWidth: 640, width: '100%', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.2s' }}>
           {[
-            ['📝', '25+ rečenica'],
-            ['🎯', '3 nivoa težine'],
-            ['⚡', 'Bez dijakritika'],
-            ['🔴', 'Realtime trka'],
-            ['🏆', 'Rang lista'],
-          ].map(([icon, label], i) => (
-            <div key={i} className="home-feature">
-              <span className="home-feature-icon">{icon}</span>
-              <span>{label}</span>
-            </div>
+            { to: '/solo',        icon: '🏃', label: 'Jedan igrač',  color: 'var(--primary)', dim: 'var(--primary-dim)' },
+            { to: '/multi',       icon: '🏁', label: 'Više igrača',  color: 'var(--accent)',  dim: 'var(--accent-dim)'  },
+            { to: '/leaderboard', icon: '🏆', label: 'Rang lista',   color: '#34d399',        dim: 'rgba(52,211,153,.1)' },
+          ].map(({ to, icon, label, color, dim }) => (
+            <Link key={to} to={to} style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
+              background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 14,
+              padding: '1.25rem 1rem', textDecoration: 'none', color: 'var(--text)',
+              transition: 'border-color .2s, transform .2s, box-shadow .2s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = color; e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = `0 8px 30px ${color}30` }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' }}
+            >
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: dim, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>{icon}</div>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700 }}>{label}</span>
+            </Link>
           ))}
         </div>
+
+        {/* Stats strip */}
+        <div style={{ display: 'flex', gap: '2.5rem', color: 'var(--text-3)', fontSize: '0.8rem', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.3s' }}>
+          {[['⚡', 'Bez dijakritika'], ['🎯', '3 nivoa težine'], ['🔴', 'Realtime']].map(([icon, label]) => (
+            <span key={label}>{icon} {label}</span>
+          ))}
+        </div>
+
       </div>
     </div>
   )
