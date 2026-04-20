@@ -17,6 +17,7 @@ public static class DbSeeder
             new Sentence { Text = "Knjiga leži na stolu pored čaše vode.", Difficulty = 1 },
             new Sentence { Text = "Pas trči po travnjaku i laje na ptice.", Difficulty = 1 },
             new Sentence { Text = "Reka teče mirno kroz zelenu dolinu.", Difficulty = 1 },
+            new Sentence { Text = "Sta ste bre navalili na grobno mesto", Difficulty = 1 },
 
             // Srednje (2)
             new Sentence { Text = "Beograd leži na ušću Save u Dunav i predstavlja srce srpske kulture.", Difficulty = 2 },
@@ -40,7 +41,7 @@ public static class DbSeeder
             new Sentence { Text = "Stari Beograd pun je istorije, a svaka ulica krije zanimljive priče iz daleke prošlosti.", Difficulty = 3 },
             new Sentence { Text = "Vetar je nosio miris cveća iz bašte kroz otvoreni prozor moje sobice na spratu.", Difficulty = 3 }
         );
-
+       
         db.SaveChanges();
     }
 }
