@@ -6,11 +6,11 @@ namespace TypeRacer.Hubs;
 
 public class GameHub(GameRoomService rooms, AppDbContext db) : Hub
 {
-    public async Task CreateRoom(string playerName)
+    public async Task CreateRoom(string playerName, string gameMode = "classic")
     {
-        var room = rooms.CreateRoom(Context.ConnectionId, playerName);
+        var room = rooms.CreateRoom(Context.ConnectionId, playerName, gameMode);
         await Groups.AddToGroupAsync(Context.ConnectionId, room.Code);
-        await Clients.Caller.SendAsync("RoomCreated", room.Code, room.Players[0]);
+        await Clients.Caller.SendAsync("RoomCreated", room.Code, room.Players[0], room.GameMode);
     }
 
     public async Task JoinRoom(string roomCode, string playerName)
@@ -22,7 +22,7 @@ public class GameHub(GameRoomService rooms, AppDbContext db) : Hub
             return;
         }
         await Groups.AddToGroupAsync(Context.ConnectionId, room.Code);
-        await Clients.Caller.SendAsync("RoomJoined", room.Code, room.Players);
+        await Clients.Caller.SendAsync("RoomJoined", room.Code, room.Players, room.GameMode);
         await Clients.OthersInGroup(room.Code).SendAsync("PlayerJoined", room.Players.Last());
     }
 
@@ -32,9 +32,19 @@ public class GameHub(GameRoomService rooms, AppDbContext db) : Hub
         if (room == null || room.HostConnectionId != Context.ConnectionId) return;
         if (room.Status != "waiting") return;
 
-        var count = db.Sentences.Count();
-        var sentence = db.Sentences.Skip(Random.Shared.Next(count)).First();
-        room.SentenceText = sentence.Text;
+        string text;
+        if (room.GameMode == "alphabet")
+        {
+            text = "abcdefghijklmnopqrstuvwxyz";
+        }
+        else
+        {
+            var count = db.Sentences.Count();
+            var sentence = db.Sentences.Skip(Random.Shared.Next(count)).First();
+            text = sentence.Text;
+        }
+
+        room.SentenceText = text;
         room.Status = "countdown";
 
         foreach (var p in room.Players) { p.Progress = 0; p.Wpm = 0; p.Finished = false; p.Place = null; }
@@ -46,7 +56,7 @@ public class GameHub(GameRoomService rooms, AppDbContext db) : Hub
         }
 
         room.Status = "playing";
-        await Clients.Group(roomCode).SendAsync("GameStarted", sentence.Text);
+        await Clients.Group(roomCode).SendAsync("GameStarted", text);
     }
 
     public async Task UpdateProgress(string roomCode, int progress, int wpm)

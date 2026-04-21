@@ -122,7 +122,17 @@ public class AuthController(AppDbContext db, IConfiguration config) : Controller
         return candidate;
     }
 
-    private static object ToDto(User u) => new { u.Id, u.Username, u.Email };
+    [HttpGet("me")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
+    public async Task<IActionResult> Me()
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var user = await db.Users.FindAsync(userId);
+        if (user == null) return NotFound();
+        return Ok(new { user.Id, user.Username, user.Email, user.Elo });
+    }
+
+    private static object ToDto(User u) => new { u.Id, u.Username, u.Email, u.Elo };
 }
 
 public record RegisterRequest(string Username, string Email, string Password);

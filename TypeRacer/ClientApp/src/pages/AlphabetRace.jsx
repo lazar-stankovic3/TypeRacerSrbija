@@ -1,20 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TypingBox from '../components/TypingBox.jsx'
-import WpmChart from '../components/WpmChart.jsx'
 import { useAuth } from '../AuthContext.jsx'
 import { sounds, isMuted, toggleMute } from '../sounds.js'
 
-const DIFFICULTIES = [
-  { value: '',  label: 'Sve' },
-  { value: '1', label: 'Lako' },
-  { value: '2', label: 'Srednje' },
-  { value: '3', label: 'Teško' },
-]
+const ALPHABET = 'abcdefghijklmnopqrstuvwxyz'
 
-export default function SinglePlayer() {
-  const [sentence, setSentence] = useState(null)
-  const [difficulty, setDifficulty] = useState('')
+export default function AlphabetRace() {
   const [phase, setPhase] = useState('ready')
   const [wpm, setWpm] = useState(0)
   const [progress, setProgress] = useState(0)
@@ -26,12 +18,8 @@ export default function SinglePlayer() {
   const [personalBest, setPersonalBest] = useState(null)
   const [isNewPb, setIsNewPb] = useState(false)
   const [muted, setMuted] = useState(isMuted())
-  const [wpmHistory, setWpmHistory] = useState([])
-  const [eloGained, setEloGained] = useState(0)
   const timerRef = useRef(null)
   const startRef = useRef(null)
-  const wpmRef = useRef(0)
-  const samplerRef = useRef(null)
   const navigate = useNavigate()
   const { token } = useAuth()
 
@@ -40,7 +28,8 @@ export default function SinglePlayer() {
     fetch('/api/results/mine', { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(data => {
-        const best = data.reduce((max, r) => r.wpm > max ? r.wpm : max, 0)
+        const alphabetResults = data.filter(r => r.mode === 'alphabet')
+        const best = alphabetResults.reduce((max, r) => r.wpm > max ? r.wpm : max, 0)
         if (best > 0) setPersonalBest(best)
       })
       .catch(() => {})
@@ -48,55 +37,40 @@ export default function SinglePlayer() {
 
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'Tab') {
+      if ((e.key === 'Tab' || e.key === 'Enter') && phase === 'finished') {
         e.preventDefault()
-        if (phase === 'finished' || phase === 'ready') loadSentence()
+        resetRace()
       }
-      if (e.key === 'Enter' && phase === 'finished') loadSentence()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [phase, difficulty])
+  }, [phase])
 
-  async function loadSentence() {
-    const url = difficulty ? `/api/sentences/random?difficulty=${difficulty}` : '/api/sentences/random'
-    const res = await fetch(url)
-    const data = await res.json()
-    setSentence(data)
+  function resetRace() {
     setPhase('ready')
     setWpm(0)
     setProgress(0)
     setElapsed(0)
-    setWpmHistory([])
     clearInterval(timerRef.current)
-    clearInterval(samplerRef.current)
   }
 
-  useEffect(() => { loadSentence() }, [difficulty])
-
-  function handleStart() {
+  function handleTypingStart() {
     if (phase !== 'ready') return
     startRef.current = Date.now()
-    wpmRef.current = 0
-    setWpmHistory([])
     setPhase('playing')
     timerRef.current = setInterval(() => {
       setElapsed(Math.floor((Date.now() - startRef.current) / 1000))
-    }, 500)
-    samplerRef.current = setInterval(() => {
-      setWpmHistory(prev => [...prev, wpmRef.current])
-    }, 1000)
+    }, 100)
   }
 
   async function handleFinish(w, accuracy) {
     clearInterval(timerRef.current)
-    const t = Math.floor((Date.now() - startRef.current) / 1000)
+    const t = parseFloat(((Date.now() - startRef.current) / 1000).toFixed(2))
     setFinalWpm(w)
     setFinalTime(t)
     setFinalAccuracy(accuracy)
-    clearInterval(samplerRef.current)
-    setWpmHistory(prev => [...prev, w])
     sounds.finish()
+
     const pb = personalBest ?? 0
     if (w > pb) {
       setPersonalBest(w)
@@ -107,42 +81,38 @@ export default function SinglePlayer() {
     setPhase('finished')
 
     if (token) {
-      const diff = difficulty ? parseInt(difficulty) : 0
-      try {
-        const res = await fetch('/api/results', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ wpm: w, accuracy, mode: 'solo', sentenceDifficulty: diff })
-        })
-        const data = await res.json()
-        setEloGained(data.eloGained ?? 0)
-      } catch {}
+      fetch('/api/results', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ wpm: w, accuracy, mode: 'alphabet' })
+      }).catch(() => {})
     }
   }
 
-  useEffect(() => () => { clearInterval(timerRef.current); clearInterval(samplerRef.current) }, [])
+  useEffect(() => () => clearInterval(timerRef.current), [])
 
   useEffect(() => {
     if (phase !== 'finished') return
     setDisplayWpm(0)
     const steps = 45
-    const delay = 900 / steps
     let step = 0
     const id = setInterval(() => {
       step++
       setDisplayWpm(Math.round(finalWpm * (step / steps)))
       if (step >= steps) clearInterval(id)
-    }, delay)
+    }, 900 / steps)
     return () => clearInterval(id)
   }, [phase, finalWpm])
 
-  const fmtTime = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`
+  const elapsedDisplay = elapsed < 60
+    ? `${elapsed}s`
+    : `${Math.floor(elapsed / 60)}:${String(elapsed % 60).padStart(2, '0')}`
 
   return (
     <div className="page">
       <div className="topbar">
         <button className="back-btn" onClick={() => navigate('/')}>← Nazad</button>
-        <span style={{ color: 'var(--text-2)', fontSize: '0.9rem', fontWeight: 600 }}>Jedan igrač</span>
+        <span style={{ color: 'var(--text-2)', fontSize: '0.9rem', fontWeight: 600 }}>Abeceda trka</span>
         <button
           className="btn btn-ghost"
           style={{ padding: '0.25rem 0.6rem', fontSize: '1rem', lineHeight: 1 }}
@@ -153,16 +123,8 @@ export default function SinglePlayer() {
         </button>
       </div>
 
-      <div className="diff-tabs">
-        {DIFFICULTIES.map(d => (
-          <button
-            key={d.value}
-            className={`diff-tab${difficulty === d.value ? ' active' : ''}`}
-            onClick={() => setDifficulty(d.value)}
-          >
-            {d.label}
-          </button>
-        ))}
+      <div style={{ textAlign: 'center', marginBottom: '1rem', color: 'var(--text-3)', fontSize: '0.85rem' }}>
+        Iskucaj celu abecedu što brže možeš
       </div>
 
       {phase !== 'finished' ? (
@@ -178,38 +140,28 @@ export default function SinglePlayer() {
               <div className="stat-value">{progress}%</div>
               <div className="stat-unit">
                 <div style={{ marginTop: 6, height: 4, background: 'var(--border)', borderRadius: 999, overflow: 'hidden' }}>
-                  <div style={{ width: `${progress}%`, height: '100%', background: 'linear-gradient(90deg, var(--primary), #a78bfa)', transition: 'width .3s', borderRadius: 999 }} />
+                  <div style={{ width: `${progress}%`, height: '100%', background: 'linear-gradient(90deg, #f59e0b, #f97316)', transition: 'width .1s', borderRadius: 999 }} />
                 </div>
               </div>
             </div>
             <div className="stat-box">
               <div className="stat-label">Vreme</div>
-              <div className="stat-value">{fmtTime(elapsed)}</div>
+              <div className="stat-value">{elapsedDisplay}</div>
               <div className="stat-unit">{phase === 'ready' ? 'kucaj da počneš' : 'u toku'}</div>
             </div>
           </div>
 
           <TypingBox
-            sentence={sentence?.text}
-            onProgress={(p, w) => { setProgress(p); setWpm(w); wpmRef.current = w }}
+            sentence={ALPHABET}
+            onProgress={(p, w) => { handleTypingStart(); setProgress(p); setWpm(w) }}
             onFinish={handleFinish}
-            disabled={phase === 'ready'}
+            disabled={false}
           />
-
-          {phase === 'playing' && wpmHistory.length >= 2 && (
-            <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'var(--surface-2)', borderRadius: 12, border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>Brzina</div>
-              <WpmChart values={wpmHistory} height={60} />
-            </div>
-          )}
 
           {phase === 'ready' && (
             <div className="text-center mt-lg">
-              <button className="btn btn-primary btn-lg" onClick={handleStart}>
-                ▶ Pokreni
-              </button>
               <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', marginTop: '0.75rem' }}>
-                ili jednostavno počni da kucaš
+                Počni da kucaš da startaš tajmer
               </p>
             </div>
           )}
@@ -217,8 +169,15 @@ export default function SinglePlayer() {
       ) : (
         <div className="card text-center" style={{ maxWidth: 420, margin: '0 auto', animation: 'pop-in .55s cubic-bezier(.22,1,.36,1) both' }}>
           <div style={{ marginBottom: '1.5rem' }}>
-            <div style={{ fontSize: '2.5rem', marginBottom: '0.25rem' }}>🏆</div>
+            <div style={{ fontSize: '2.5rem', marginBottom: '0.25rem' }}>🔤</div>
             <div className="finished-title">Završeno!</div>
+          </div>
+
+          <div style={{ fontSize: '3rem', fontWeight: 900, color: '#f59e0b', lineHeight: 1, marginBottom: '0.25rem' }}>
+            {finalTime}s
+          </div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1.5rem' }}>
+            vreme
           </div>
 
           <div className="finished-wpm wpm-appear">{displayWpm}</div>
@@ -226,25 +185,14 @@ export default function SinglePlayer() {
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', margin: '1.5rem 0' }}>
             <div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Vreme</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{fmtTime(finalTime)}</div>
-            </div>
-            <div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Tačnost</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{finalAccuracy}%</div>
             </div>
             <div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Znakova</div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{sentence?.text.length}</div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>26</div>
             </div>
           </div>
-
-          {wpmHistory.length >= 2 && (
-            <div style={{ margin: '0 0 1.25rem', padding: '0.75rem', background: 'var(--surface-2)', borderRadius: 10, border: '1px solid var(--border)' }}>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.4rem' }}>Kriva brzine</div>
-              <WpmChart values={wpmHistory} height={64} />
-            </div>
-          )}
 
           {isNewPb && (
             <div style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.95rem', marginBottom: '0.5rem' }}>
@@ -257,19 +205,14 @@ export default function SinglePlayer() {
             </div>
           )}
 
-          {token && eloGained > 0 && (
-            <div style={{ background: 'var(--primary-dim)', border: '1px solid rgba(124,90,246,.3)', borderRadius: 10, padding: '0.6rem', marginBottom: '0.75rem', color: '#a78bfa', fontWeight: 700, fontSize: '0.95rem' }}>
-              +{eloGained} ELO 🏅
-            </div>
-          )}
           {token && <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', marginBottom: '1rem' }}>✓ Rezultat sačuvan na leaderboard-u</p>}
 
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-            <button className="btn btn-primary" onClick={loadSentence}>Nova rečenica</button>
+            <button className="btn btn-primary" onClick={resetRace}>Pokušaj ponovo</button>
             <button className="btn btn-ghost" onClick={() => navigate('/')}>Meni</button>
           </div>
           <p style={{ color: 'var(--text-3)', fontSize: '0.75rem', marginTop: '1rem' }}>
-            Tab / Enter → nova rečenica
+            Tab / Enter → pokušaj ponovo
           </p>
         </div>
       )}

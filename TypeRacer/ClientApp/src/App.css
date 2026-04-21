@@ -1,6 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=VT323&display=swap');
 
-/* ── Variables ─────────────────────────────────── */
+/* ── Variables — Dark (default) ─────────────────── */
 :root {
   --bg:           #06060f;
   --surface:      #0d0d1a;
@@ -22,6 +22,60 @@
   --sans:         'Inter', system-ui, sans-serif;
   --r:            10px;
   --r-lg:         16px;
+  --body-bg-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,90,246,.12) 0%, transparent 70%),
+    radial-gradient(circle, rgba(255,255,255,.025) 1px, transparent 1px);
+  --body-bg-size: 100% 100%, 28px 28px;
+}
+
+/* ── Theme: Light ────────────────────────────────── */
+[data-theme="light"] {
+  --bg:           #f0f0f8;
+  --surface:      #ffffff;
+  --card:         #ffffff;
+  --card-hover:   #f5f5fc;
+  --border:       #dcdce8;
+  --border-lit:   #b8b8d0;
+  --primary:      #6d4ae3;
+  --primary-dim:  rgba(109,74,227,.12);
+  --primary-glow: rgba(109,74,227,.3);
+  --accent:       #c8860a;
+  --accent-dim:   rgba(200,134,10,.12);
+  --success:      #16a34a;
+  --danger:       #dc2626;
+  --text:         #111128;
+  --text-2:       #444466;
+  --text-3:       #9999bb;
+  --body-bg-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(109,74,227,.08) 0%, transparent 70%),
+    radial-gradient(circle, rgba(0,0,0,.04) 1px, transparent 1px);
+  --body-bg-size: 100% 100%, 28px 28px;
+}
+
+/* ── Theme: Retro ────────────────────────────────── */
+[data-theme="retro"] {
+  --bg:           #050a00;
+  --surface:      #0a1200;
+  --card:         #0d1700;
+  --card-hover:   #121f00;
+  --border:       #1a3300;
+  --border-lit:   #2d5500;
+  --primary:      #00ff41;
+  --primary-dim:  rgba(0,255,65,.1);
+  --primary-glow: rgba(0,255,65,.45);
+  --accent:       #ffff00;
+  --accent-dim:   rgba(255,255,0,.1);
+  --success:      #00ff41;
+  --danger:       #ff3333;
+  --text:         #00ff41;
+  --text-2:       #00cc33;
+  --text-3:       #005518;
+  --mono:         'VT323', 'Courier New', monospace;
+  --sans:         'VT323', 'Courier New', monospace;
+  --body-bg-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,255,65,.06) 0%, transparent 70%),
+    repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0px, rgba(0,0,0,.18) 1px, transparent 1px, transparent 3px);
+  --body-bg-size: 100% 100%, 100% 100%;
 }
 
 /* ── Reset ──────────────────────────────────────── */
@@ -32,14 +86,67 @@ html { font-size: 16px; }
 body {
   font-family: var(--sans);
   background-color: var(--bg);
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,90,246,.12) 0%, transparent 70%),
-    radial-gradient(circle, rgba(255,255,255,.025) 1px, transparent 1px);
-  background-size: 100% 100%, 28px 28px;
+  background-image: var(--body-bg-image);
+  background-size: var(--body-bg-size);
   color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  transition: background-color .3s, color .3s;
 }
+
+[data-theme="retro"] body {
+  font-size: 17px;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 8px rgba(0,255,65,.4);
+}
+
+[data-theme="retro"] .btn-primary {
+  background: var(--primary);
+  color: #000;
+  text-shadow: none;
+  font-weight: 900;
+}
+
+[data-theme="retro"] .btn-primary:hover:not(:disabled) {
+  background: #00cc33;
+  box-shadow: 0 0 20px rgba(0,255,65,.6);
+}
+
+[data-theme="retro"] .typing-input {
+  text-shadow: 0 0 6px rgba(0,255,65,.5);
+}
+
+[data-theme="retro"] .stat-box.highlight .stat-value {
+  color: var(--primary);
+  text-shadow: 0 0 12px rgba(0,255,65,.6);
+}
+
+[data-theme="retro"] .logo-text {
+  background: linear-gradient(135deg, #00ff41, #00cc33);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="retro"] .home-nav {
+  background: rgba(5,10,0,.9);
+  border-bottom-color: rgba(0,255,65,.15);
+}
+
+[data-theme="light"] .home-nav {
+  background: rgba(240,240,248,.85);
+  border-bottom-color: rgba(0,0,0,.08);
+}
+
+[data-theme="light"] .btn-primary {
+  box-shadow: 0 2px 8px rgba(109,74,227,.25);
+}
+
+/* ── Rank badge colors ───────────────────────────── */
+.rank-bronze  { color: #cd7f32; }
+.rank-silver  { color: #94a3b8; }
+.rank-gold    { color: #f59e0b; }
+.rank-diamond { color: #67e8f9; }
+.rank-master  { color: #a78bfa; }
 
 /* ── Page shell ─────────────────────────────────── */
 .page {
@@ -685,6 +792,11 @@ body {
 @keyframes countdown-pop {
   from { transform: scale(1.6); opacity: 0; }
   to   { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
 
 /* ── Finished banner ────────────────────────────── */

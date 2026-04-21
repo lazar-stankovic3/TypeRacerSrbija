@@ -20,6 +20,8 @@ export default function MultiPlayer() {
   const [myWpm, setMyWpm] = useState(0)
   const [myProgress, setMyProgress] = useState(0)
 
+  const [selectedMode, setSelectedMode] = useState('classic')
+  const [roomGameMode, setRoomGameMode] = useState('classic')
   const [copied, setCopied] = useState(false)
   const hubRef = useRef(null)
   const navigate = useNavigate()
@@ -37,19 +39,21 @@ export default function MultiPlayer() {
       .withAutomaticReconnect()
       .build()
 
-    conn.on('RoomCreated', (code, me) => {
+    conn.on('RoomCreated', (code, me, gameMode) => {
       setMyId(conn.connectionId)
       setRoomCode(code)
       setPlayers([me])
       setIsHost(true)
+      setRoomGameMode(gameMode ?? 'classic')
       setView('lobby')
     })
 
-    conn.on('RoomJoined', (code, allPlayers) => {
+    conn.on('RoomJoined', (code, allPlayers, gameMode) => {
       setMyId(conn.connectionId)
       setRoomCode(code)
       setPlayers(allPlayers)
       setIsHost(false)
+      setRoomGameMode(gameMode ?? 'classic')
       setView('lobby')
     })
 
@@ -100,7 +104,7 @@ export default function MultiPlayer() {
   async function createRoom() {
     if (!playerName.trim()) { setError('Unesite vaše ime'); return }
     setError('')
-    await hubRef.current.invoke('CreateRoom', playerName.trim())
+    await hubRef.current.invoke('CreateRoom', playerName.trim(), selectedMode)
   }
 
   async function joinRoom() {
@@ -129,7 +133,7 @@ export default function MultiPlayer() {
       fetch('/api/results', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ wpm, accuracy: accuracy ?? 100, mode: 'multi' })
+        body: JSON.stringify({ wpm, accuracy: accuracy ?? 100, mode: roomGameMode === 'alphabet' ? 'alphabet' : 'multi' })
       }).catch(() => {})
     }
   }
@@ -182,6 +186,25 @@ export default function MultiPlayer() {
           />
         </div>
 
+        <div style={{ marginBottom: '0.75rem' }}>
+          <label className="field-label" style={{ marginBottom: '0.5rem', display: 'block' }}>Tip igre</label>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {[
+              { value: 'classic', label: '🏁 Klasični' },
+              { value: 'alphabet', label: '🔤 Abeceda' },
+            ].map(m => (
+              <button
+                key={m.value}
+                className={`btn ${selectedMode === m.value ? 'btn-primary' : 'btn-ghost'}`}
+                style={{ flex: 1, fontSize: '0.875rem' }}
+                onClick={() => setSelectedMode(m.value)}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <button className="btn btn-primary w-full" style={{ marginBottom: '0.75rem' }} onClick={createRoom}>
           Napravi novu sobu
         </button>
@@ -223,6 +246,21 @@ export default function MultiPlayer() {
           <div className="room-code-label">Kod sobe</div>
           <div className="room-code-value">{roomCode}</div>
           <div className="room-code-hint">Podelite ovaj kod sa prijateljima</div>
+        </div>
+
+        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+          <span style={{
+            display: 'inline-block',
+            padding: '0.25rem 0.75rem',
+            borderRadius: 999,
+            fontSize: '0.8rem',
+            fontWeight: 600,
+            background: roomGameMode === 'alphabet' ? 'rgba(245,158,11,.15)' : 'var(--primary-dim)',
+            color: roomGameMode === 'alphabet' ? '#f59e0b' : 'var(--primary)',
+            border: `1px solid ${roomGameMode === 'alphabet' ? 'rgba(245,158,11,.3)' : 'rgba(124,90,246,.3)'}`,
+          }}>
+            {roomGameMode === 'alphabet' ? '🔤 Abeceda trka' : '🏁 Klasični mod'}
+          </span>
         </div>
 
         <button

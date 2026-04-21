@@ -17,6 +17,7 @@ public class GameRoom
     public string Code { get; set; } = "";
     public string HostConnectionId { get; set; } = "";
     public string Status { get; set; } = "waiting"; // waiting, countdown, playing, finished
+    public string GameMode { get; set; } = "classic"; // classic, alphabet
     public string? SentenceText { get; set; }
     public List<RoomPlayer> Players { get; set; } = [];
 }
@@ -26,13 +27,14 @@ public class GameRoomService
     private readonly ConcurrentDictionary<string, GameRoom> _rooms = new();
     private readonly ConcurrentDictionary<string, string> _playerRooms = new(); // connectionId → roomCode
 
-    public GameRoom CreateRoom(string connectionId, string playerName)
+    public GameRoom CreateRoom(string connectionId, string playerName, string gameMode = "classic")
     {
         var code = GenerateCode();
         var room = new GameRoom
         {
             Code = code,
             HostConnectionId = connectionId,
+            GameMode = gameMode,
             Players = [new RoomPlayer { ConnectionId = connectionId, Name = playerName }]
         };
         _rooms[code] = room;

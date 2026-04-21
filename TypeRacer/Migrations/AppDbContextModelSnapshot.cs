@@ -26,12 +26,18 @@ namespace TypeRacer.Migrations
                     b.Property<int>("Accuracy")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("EloGained")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Mode")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("PlayedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("SentenceDifficulty")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
@@ -72,6 +78,9 @@ namespace TypeRacer.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Elo")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Email")
                         .IsRequired()

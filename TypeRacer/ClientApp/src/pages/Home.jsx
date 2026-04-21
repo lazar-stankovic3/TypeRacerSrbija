@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../AuthContext'
+import { useTheme } from '../ThemeContext'
 
 const CHARS = 'asdfghjklqwertyuiopzxcvbnm{}[]()<>|/\\;:'.split('')
 
-function useFloatingChars(canvasRef) {
+function useFloatingChars(canvasRef, theme) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -31,6 +32,12 @@ function useFloatingChars(canvasRef) {
       }
     }
 
+    function getColors() {
+      if (theme === 'retro') return { primary: '#00ff41', accent: '#ffff00' }
+      if (theme === 'light') return { primary: '#6d4ae3', accent: '#c8860a' }
+      return { primary: '#7c5af6', accent: '#f0b429' }
+    }
+
     function init() {
       resize()
       particles = Array.from({ length: 55 }, make)
@@ -38,7 +45,7 @@ function useFloatingChars(canvasRef) {
 
     function draw() {
       ctx.clearRect(0, 0, W, H)
-      ctx.font = `500 {size}px 'JetBrains Mono', monospace`
+      const { primary, accent } = getColors()
 
       for (const p of particles) {
         p.life++
@@ -53,7 +60,7 @@ function useFloatingChars(canvasRef) {
           : 1
 
         ctx.globalAlpha = p.alpha * fade
-        ctx.fillStyle = Math.random() > 0.97 ? '#f0b429' : '#7c5af6'
+        ctx.fillStyle = Math.random() > 0.97 ? accent : primary
         ctx.font = `500 ${p.size}px 'JetBrains Mono', monospace`
         ctx.fillText(p.ch, p.x, p.y)
 
@@ -73,25 +80,24 @@ function useFloatingChars(canvasRef) {
     ro.observe(canvas)
 
     return () => { cancelAnimationFrame(raf); ro.disconnect() }
-  }, [])
+  }, [theme])
 }
 
 export default function Home() {
   const { user, logout } = useAuth()
+  const { theme, cycleTheme, THEME_ICONS } = useTheme()
   const navigate = useNavigate()
   const canvasRef = useRef(null)
-  useFloatingChars(canvasRef)
+  useFloatingChars(canvasRef, theme)
 
   return (
     <div className="home-page" style={{ position: 'relative', minHeight: '100vh', overflow: 'hidden' }}>
 
-      {/* Canvas pozadina */}
       <canvas
         ref={canvasRef}
         style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0 }}
       />
 
-      {/* Navbar */}
       <nav className="home-nav" style={{ position: 'relative', zIndex: 10 }}>
         <div className="home-nav-inner">
           <div className="home-nav-logo">
@@ -99,6 +105,14 @@ export default function Home() {
             <span className="logo-text" style={{ fontSize: '1.25rem' }}>TypeRacer</span>
           </div>
           <div className="home-nav-actions">
+            <button
+              className="btn btn-ghost"
+              style={{ padding: '0.35rem 0.75rem', fontSize: '1rem', lineHeight: 1 }}
+              title={`Tema: ${theme}`}
+              onClick={cycleTheme}
+            >
+              {THEME_ICONS[theme]}
+            </button>
             {user ? (
               <>
                 <button className="profile-avatar-btn" onClick={() => navigate('/profile')}>
@@ -123,10 +137,8 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Sadržaj */}
       <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 64px)', gap: '3rem', padding: '2rem' }}>
 
-        {/* Hero */}
         <div style={{ textAlign: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both' }}>
           <div style={{ display: 'inline-block', background: 'var(--primary-dim)', border: '1px solid rgba(124,90,246,.3)', borderRadius: 999, padding: '0.3rem 1rem', fontSize: '0.8rem', color: '#a78bfa', fontWeight: 600, marginBottom: '1.5rem', letterSpacing: '0.05em' }}>
             🇷🇸 Srpski jezik
@@ -141,18 +153,18 @@ export default function Home() {
           </p>
         </div>
 
-        {/* CTA dugmad */}
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.1s' }}>
           <Link to="/solo" className="btn btn-primary btn-lg">▶ Počni odmah</Link>
-          <Link to="/multi" className="btn btn-ghost btn-lg">👥 Višeigračko</Link>
+          <Link to="/multi" className="btn btn-ghost btn-lg">👥 Više igrača</Link>
         </div>
 
-        {/* Mode kartice */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', maxWidth: 640, width: '100%', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.2s' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', maxWidth: 900, width: '100%', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.2s' }}>
           {[
-            { to: '/solo',        icon: '🏃', label: 'Jedan igrač',  color: 'var(--primary)', dim: 'var(--primary-dim)' },
-            { to: '/multi',       icon: '🏁', label: 'Više igrača',  color: 'var(--accent)',  dim: 'var(--accent-dim)'  },
-            { to: '/leaderboard', icon: '🏆', label: 'Rang lista',   color: '#34d399',        dim: 'rgba(52,211,153,.1)' },
+            { to: '/solo',        icon: '🏃', label: 'Jedan igrač',   color: 'var(--primary)', dim: 'var(--primary-dim)' },
+            { to: '/multi',       icon: '🏁', label: 'Više igrača',   color: 'var(--accent)',  dim: 'var(--accent-dim)'  },
+            { to: '/alphabet',    icon: '🔤', label: 'Abeceda',       color: '#f59e0b',        dim: 'rgba(245,158,11,.1)' },
+            { to: '/daily',       icon: '📅', label: 'Dnevni izazov', color: '#34d399',        dim: 'rgba(52,211,153,.1)' },
+            { to: '/leaderboard', icon: '🏆', label: 'Rang lista',    color: '#a78bfa',        dim: 'rgba(167,139,250,.1)' },
           ].map(({ to, icon, label, color, dim }) => (
             <Link key={to} to={to} style={{
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem',
@@ -164,14 +176,13 @@ export default function Home() {
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' }}
             >
               <div style={{ width: 44, height: 44, borderRadius: 12, background: dim, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem' }}>{icon}</div>
-              <span style={{ fontSize: '0.875rem', fontWeight: 700 }}>{label}</span>
+              <span style={{ fontSize: '0.875rem', fontWeight: 700, textAlign: 'center' }}>{label}</span>
             </Link>
           ))}
         </div>
 
-        {/* Stats strip */}
-        <div style={{ display: 'flex', gap: '2.5rem', color: 'var(--text-3)', fontSize: '0.8rem', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.3s' }}>
-          {[['⚡', 'Bez dijakritika'], ['🎯', '3 nivoa težine'], ['🔴', 'Realtime']].map(([icon, label]) => (
+        <div style={{ display: 'flex', gap: '2.5rem', color: 'var(--text-3)', fontSize: '0.8rem', flexWrap: 'wrap', justifyContent: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.3s' }}>
+          {[['⚡', 'Bez dijakritika'], ['🎯', '3 nivoa težine'], ['🔴', 'Realtime'], ['🏅', 'ELO rang sistem']].map(([icon, label]) => (
             <span key={label}>{icon} {label}</span>
           ))}
         </div>
