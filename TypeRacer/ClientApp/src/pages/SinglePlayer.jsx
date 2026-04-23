@@ -218,7 +218,7 @@ export default function SinglePlayer() {
           <div className="finished-wpm wpm-appear">{displayWpm}</div>
           <div className="finished-wpm-label">reči u minuti</div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', margin: '1.5rem 0' }}>
+          <div className="finished-stats">
             <div>
               <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Vreme</div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{fmtTime(finalTime)}</div>

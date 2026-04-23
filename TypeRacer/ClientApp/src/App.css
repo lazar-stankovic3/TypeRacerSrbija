@@ -1077,3 +1077,209 @@ body {
 }
 
 .home-feature-icon { font-size: 0.9rem; }
+
+/* ══════════════════════════════════════════════════
+   LAYOUT HELPERS
+   ══════════════════════════════════════════════════ */
+
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stats-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.finished-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.home-modes-3col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  max-width: 640px;
+  width: 100%;
+}
+
+.stats-strip {
+  display: flex;
+  gap: 2.5rem;
+  color: var(--text-3);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — TABLET  (≤ 768px)
+   ══════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .page {
+    padding: 1.75rem 1rem 3rem;
+  }
+
+  .home-nav-inner {
+    padding: 0 1rem;
+  }
+
+  .sentence-text {
+    font-size: 1.15rem;
+  }
+
+  .sentence-wrap {
+    padding: 1.4rem 1.4rem;
+  }
+
+  .countdown-num {
+    font-size: 6rem;
+  }
+
+  .home-modes-3col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — PHONE  (≤ 480px)
+   ══════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+  .page {
+    padding: 1.25rem 0.875rem 2.5rem;
+  }
+
+  .home-nav-inner {
+    padding: 0 0.875rem;
+  }
+
+  .nav-username {
+    display: none;
+  }
+
+  .topbar {
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card {
+    padding: 1.1rem;
+  }
+
+  .menu-card {
+    padding: 1.4rem 1.1rem;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat-value {
+    font-size: 1.65rem;
+  }
+
+  .sentence-text {
+    font-size: 0.98rem;
+    line-height: 1.75;
+  }
+
+  .sentence-wrap {
+    padding: 1rem;
+    min-height: 70px;
+  }
+
+  .diff-tabs {
+    flex-wrap: wrap;
+  }
+
+  .countdown-num {
+    font-size: 5rem;
+  }
+
+  .finished-wpm {
+    font-size: 3rem;
+  }
+
+  .finished-stats {
+    gap: 1.25rem;
+  }
+
+  .room-code-value {
+    font-size: 2.1rem;
+    letter-spacing: 0.18em;
+  }
+
+  .room-code-box {
+    padding: 1.1rem;
+  }
+
+  .result-row {
+    gap: 0.5rem;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .race-track {
+    padding: 1rem;
+  }
+
+  .profile-avatar-lg {
+    width: 46px;
+    height: 46px;
+    font-size: 1.2rem;
+  }
+
+  .home-modes-3col {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-strip {
+    gap: 1rem;
+    font-size: 0.78rem;
+  }
+
+  .home-content-wrap {
+    gap: 2rem;
+    padding: 2rem 1rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — EXTRA SMALL  (≤ 360px)
+   ══════════════════════════════════════════════════ */
+
+@media (max-width: 360px) {
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-2col {
+    grid-template-columns: 1fr;
+  }
+
+  .sentence-text {
+    font-size: 0.9rem;
+  }
+
+  .room-code-value {
+    font-size: 1.8rem;
+    letter-spacing: 0.12em;
+  }
+
+  .result-wpm {
+    font-size: 0.95rem;
+  }
+}

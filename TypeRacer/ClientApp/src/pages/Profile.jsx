@@ -71,7 +71,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem', animation: 'card-in .4s cubic-bezier(.22,1,.36,1) both', animationDelay: '0.12s' }}>
+        <div className="stats-2col" style={{ animation: 'card-in .4s cubic-bezier(.22,1,.36,1) both', animationDelay: '0.12s' }}>
           <div className="stat-box">
             <div className="stat-label">Solo igre</div>
             <div className="stat-value" style={{ fontSize: '1.5rem' }}>{soloGames}</div>
@@ -115,7 +115,8 @@ export default function Profile() {
             </div>
           ) : (
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="table-scroll">
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 360 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     <th style={th}>WPM</th>
@@ -153,6 +154,7 @@ export default function Profile() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </div>

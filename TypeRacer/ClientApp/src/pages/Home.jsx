@@ -103,7 +103,7 @@ export default function Home() {
               <>
                 <button className="profile-avatar-btn" onClick={() => navigate('/profile')}>
                   <div className="profile-avatar">{user.username[0].toUpperCase()}</div>
-                  <span style={{ color: 'var(--text-2)', fontSize: '0.875rem', fontWeight: 500 }}>{user.username}</span>
+                  <span className="nav-username" style={{ color: 'var(--text-2)', fontSize: '0.875rem', fontWeight: 500 }}>{user.username}</span>
                 </button>
                 <button className="btn btn-ghost" style={{ padding: '0.35rem 0.9rem', fontSize: '0.85rem' }} onClick={logout}>
                   Odjavi se
@@ -124,7 +124,7 @@ export default function Home() {
       </nav>
 
       {/* Sadržaj */}
-      <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 64px)', gap: '3rem', padding: '2rem' }}>
+      <div className="home-content-wrap" style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 64px)', gap: '3rem', padding: '2rem' }}>
 
         {/* Hero */}
         <div style={{ textAlign: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both' }}>
@@ -148,7 +148,7 @@ export default function Home() {
         </div>
 
         {/* Mode kartice */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', maxWidth: 640, width: '100%', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.2s' }}>
+        <div className="home-modes-3col" style={{ animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.2s' }}>
           {[
             { to: '/solo',        icon: '🏃', label: 'Jedan igrač',  color: 'var(--primary)', dim: 'var(--primary-dim)' },
             { to: '/multi',       icon: '🏁', label: 'Više igrača',  color: 'var(--accent)',  dim: 'var(--accent-dim)'  },
@@ -170,7 +170,7 @@ export default function Home() {
         </div>
 
         {/* Stats strip */}
-        <div style={{ display: 'flex', gap: '2.5rem', color: 'var(--text-3)', fontSize: '0.8rem', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.3s' }}>
+        <div className="stats-strip" style={{ animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.3s' }}>
           {[['⚡', 'Bez dijakritika'], ['🎯', '3 nivoa težine'], ['🔴', 'Realtime']].map(([icon, label]) => (
             <span key={label}>{icon} {label}</span>
           ))}
