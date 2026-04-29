@@ -19,20 +19,35 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString =
-    Environment.GetEnvironmentVariable("DATABASE_URL") ??
-    BuildConnectionStringFromPgVars() ??
-    builder.Configuration.GetConnectionString("DefaultConnection");
+var dbUrl    = Environment.GetEnvironmentVariable("DATABASE_URL");
+var pgHost   = Environment.GetEnvironmentVariable("PGHOST");
+var pgPort   = Environment.GetEnvironmentVariable("PGPORT");
+var pgDb     = Environment.GetEnvironmentVariable("PGDATABASE");
+var pgUser   = Environment.GetEnvironmentVariable("PGUSER");
+var pgPass   = Environment.GetEnvironmentVariable("PGPASSWORD");
 
-static string? BuildConnectionStringFromPgVars()
+Console.WriteLine($"[DB] DATABASE_URL set: {dbUrl != null}");
+Console.WriteLine($"[DB] PGHOST: {pgHost ?? "NOT SET"}");
+Console.WriteLine($"[DB] PGPORT: {pgPort ?? "NOT SET"}");
+Console.WriteLine($"[DB] PGDATABASE: {pgDb ?? "NOT SET"}");
+Console.WriteLine($"[DB] PGUSER: {pgUser ?? "NOT SET"}");
+Console.WriteLine($"[DB] PGPASSWORD set: {pgPass != null}");
+
+string? connectionString;
+if (dbUrl != null)
 {
-    var host = Environment.GetEnvironmentVariable("PGHOST");
-    var port = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
-    var db   = Environment.GetEnvironmentVariable("PGDATABASE");
-    var user = Environment.GetEnvironmentVariable("PGUSER");
-    var pass = Environment.GetEnvironmentVariable("PGPASSWORD");
-    if (host == null || db == null || user == null || pass == null) return null;
-    return $"Host={host};Port={port};Database={db};Username={user};Password={pass};SSL Mode=Require;Trust Server Certificate=true";
+    connectionString = dbUrl;
+    Console.WriteLine("[DB] Using DATABASE_URL");
+}
+else if (pgHost != null && pgDb != null && pgUser != null && pgPass != null)
+{
+    connectionString = $"Host={pgHost};Port={pgPort ?? "5432"};Database={pgDb};Username={pgUser};Password={pgPass};SSL Mode=Require;Trust Server Certificate=true";
+    Console.WriteLine("[DB] Using PG* variables");
+}
+else
+{
+    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    Console.WriteLine("[DB] Using appsettings.json (fallback)");
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
