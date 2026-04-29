@@ -197,7 +197,8 @@ export default function Profile() {
             </div>
           ) : (
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div className="table-scroll">
+              <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 420 }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     <th style={th}>WPM</th>
@@ -239,6 +240,7 @@ export default function Profile() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </div>

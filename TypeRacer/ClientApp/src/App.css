@@ -1189,3 +1189,151 @@ body {
 }
 
 .home-feature-icon { font-size: 0.9rem; }
+
+/* ══════════════════════════════════════════════════
+   HOME MODE GRID
+   ══════════════════════════════════════════════════ */
+
+.home-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  max-width: 900px;
+  width: 100%;
+}
+
+/* Table horizontal scroll wrapper */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — TABLET  (≤ 768 px)
+   ══════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .home-mode-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+  }
+
+  .sentence-text {
+    font-size: 1.15rem;
+    line-height: 1.8;
+  }
+
+  .sentence-wrap {
+    padding: 1.25rem;
+  }
+
+  .home-content {
+    padding: 70px 1rem 3rem;
+  }
+
+  .hero {
+    padding: 3.5rem 0 2.5rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   RESPONSIVE — MOBILE  (≤ 480 px)
+   ══════════════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+  html { font-size: 15px; }
+
+  .page {
+    padding: 1.5rem 0.875rem 2.5rem;
+  }
+
+  .home-mode-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .sentence-text {
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .sentence-wrap {
+    padding: 1rem 0.875rem;
+    min-height: 70px;
+  }
+
+  .stats-row {
+    gap: 0.5rem;
+  }
+
+  .stat-box {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.62rem;
+  }
+
+  .countdown-num {
+    font-size: 5rem;
+  }
+
+  .room-code-value {
+    font-size: 2rem;
+    letter-spacing: 0.12em;
+  }
+
+  .diff-tabs {
+    gap: 0.3rem;
+    flex-wrap: wrap;
+  }
+
+  .diff-tab {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.65rem;
+  }
+
+  .topbar {
+    margin-bottom: 1.5rem;
+    gap: 0.5rem;
+  }
+
+  .home-nav-inner {
+    height: 52px;
+    padding: 0 0.875rem;
+  }
+
+  /* Hide username text in nav on small screens */
+  .nav-username {
+    display: none;
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.4rem;
+    font-size: 0.95rem;
+  }
+
+  .finished-wpm {
+    font-size: 3rem;
+  }
+
+  .hero {
+    padding: 2.5rem 0 1.75rem;
+  }
+
+  .hero-badge {
+    margin-bottom: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.2rem;
+  }
+
+  .menu-card {
+    padding: 1.5rem 1.25rem;
+  }
+}

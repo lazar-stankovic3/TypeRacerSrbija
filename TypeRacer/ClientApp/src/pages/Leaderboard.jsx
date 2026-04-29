@@ -59,7 +59,8 @@ export default function Leaderboard() {
         </div>
 
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="table-scroll">
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 480 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-2)' }}>
                 <th style={th}>#</th>
@@ -103,6 +104,7 @@ export default function Leaderboard() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </div>

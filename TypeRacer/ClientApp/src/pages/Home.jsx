@@ -117,7 +117,7 @@ export default function Home() {
               <>
                 <button className="profile-avatar-btn" onClick={() => navigate('/profile')}>
                   <div className="profile-avatar">{user.username[0].toUpperCase()}</div>
-                  <span style={{ color: 'var(--text-2)', fontSize: '0.875rem', fontWeight: 500 }}>{user.username}</span>
+                  <span className="nav-username" style={{ color: 'var(--text-2)', fontSize: '0.875rem', fontWeight: 500 }}>{user.username}</span>
                 </button>
                 <button className="btn btn-ghost" style={{ padding: '0.35rem 0.9rem', fontSize: '0.85rem' }} onClick={logout}>
                   Odjavi se
@@ -137,7 +137,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 64px)', gap: '3rem', padding: '2rem' }}>
+      <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 64px)', gap: 'clamp(1.5rem, 4vw, 3rem)', padding: 'clamp(1rem, 4vw, 2rem)' }}>
 
         <div style={{ textAlign: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both' }}>
           <div style={{ display: 'inline-block', background: 'var(--primary-dim)', border: '1px solid rgba(124,90,246,.3)', borderRadius: 999, padding: '0.3rem 1rem', fontSize: '0.8rem', color: '#a78bfa', fontWeight: 600, marginBottom: '1.5rem', letterSpacing: '0.05em' }}>
@@ -158,7 +158,7 @@ export default function Home() {
           <Link to="/multi" className="btn btn-ghost btn-lg">👥 Više igrača</Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', maxWidth: 900, width: '100%', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.2s' }}>
+        <div className="home-mode-grid" style={{ animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.2s' }}>
           {[
             { to: '/solo',        icon: '🏃', label: 'Jedan igrač',   color: 'var(--primary)', dim: 'var(--primary-dim)' },
             { to: '/multi',       icon: '🏁', label: 'Više igrača',   color: 'var(--accent)',  dim: 'var(--accent-dim)'  },
@@ -181,7 +181,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '2.5rem', color: 'var(--text-3)', fontSize: '0.8rem', flexWrap: 'wrap', justifyContent: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.3s' }}>
+        <div style={{ display: 'flex', gap: 'clamp(1rem, 4vw, 2.5rem)', color: 'var(--text-3)', fontSize: '0.8rem', flexWrap: 'wrap', justifyContent: 'center', animation: 'card-in .6s cubic-bezier(.22,1,.36,1) both', animationDelay: '.3s' }}>
           {[['⚡', 'Bez dijakritika'], ['🎯', '3 nivoa težine'], ['🔴', 'Realtime'], ['🏅', 'ELO rang sistem']].map(([icon, label]) => (
             <span key={label}>{icon} {label}</span>
           ))}
